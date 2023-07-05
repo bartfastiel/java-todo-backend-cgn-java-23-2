@@ -15,7 +15,7 @@ class TodoService {
     }
 
     List<Todo> getAll() {
-        return todoRepository.getAll();
+        return todoRepository.findAll();
     }
 
     public Todo save(Todo todo) {
@@ -27,15 +27,15 @@ class TodoService {
     }
 
     public Todo getById(String id) {
-        return todoRepository.getById(id);
+        return todoRepository.findById(id).orElseThrow();
     }
 
     public Todo update(Todo todo) {
-        return todoRepository.update(todo);
+        return todoRepository.save(todo);
     }
 
     public void delete(String id) {
-        todoRepository.delete(id);
+        todoRepository.deleteById(id);
     }
 }
 

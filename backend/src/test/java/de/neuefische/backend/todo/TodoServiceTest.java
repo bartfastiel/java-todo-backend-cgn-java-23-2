@@ -19,7 +19,7 @@ class TodoServiceTest {
     void getAllCallsRepository() {
         // given
         Todo testItem = new Todo("bla", TodoStatus.OPEN);
-        Mockito.when(todoRepository.getAll())
+        Mockito.when(todoRepository.findAll())
                 .thenReturn(Collections.singletonList(testItem));
 
         // when
