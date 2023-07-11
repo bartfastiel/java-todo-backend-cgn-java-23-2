@@ -30,6 +30,7 @@ public class SecurityConfig {
 
                                 .requestMatchers(HttpMethod.GET, "/api/todo/**").permitAll()
                                 .requestMatchers( "/api/todo/**").authenticated()
+                                .requestMatchers("/api/users/me").permitAll()
                                 .anyRequest().permitAll()
                         )
                 .formLogin(Customizer.withDefaults())
