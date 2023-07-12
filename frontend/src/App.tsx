@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import TodoColumn from "./TodoColumn.tsx";
 import {allPossibleTodos} from "./TodoStatus.ts";
+import LoginPage from "./LoginPage";
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
                         />
                     })
                 }
+                <LoginPage/>
             </div>
         </>
     )
