@@ -1,5 +1,6 @@
 package de.neuefische.backend.todo;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,7 +24,7 @@ class TodoController {
     }
 
     @PostMapping
-    Todo postTodo(@RequestBody Todo todo) {
+    Todo postTodo(@Valid @RequestBody Todo todo) {
         return todoService.save(todo);
     }
 
@@ -33,7 +34,7 @@ class TodoController {
     }
 
     @PutMapping(path = {"{id}/update", "{id}"})
-    Todo update(@PathVariable String id, @RequestBody Todo todo) {
+    Todo update(@PathVariable String id, @Valid @RequestBody Todo todo) {
         if (!todo.id().equals(id)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The id in the url does not match the request body's id");
         }
@@ -44,7 +45,7 @@ class TodoController {
     void delete(@PathVariable String id) {
         todoService.delete(id);
     }
- }
+}
 
 
 
