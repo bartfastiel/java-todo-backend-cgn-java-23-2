@@ -34,7 +34,7 @@ public class SecurityConfig {
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests(httpRequests ->
                         httpRequests
-                                .requestMatchers(HttpMethod.GET, "/api/todo").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/todo").authenticated()
                                 .requestMatchers("/api/todo").authenticated()
 
                                 .requestMatchers(HttpMethod.GET, "/api/todo/**").permitAll()

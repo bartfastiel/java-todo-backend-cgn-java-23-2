@@ -14,18 +14,25 @@ public record Todo(
         @Size(min = 6, max = 128, message = "Beschreibung muss zwischen 6 und 128 Zeichen lang sein!")
         String description,
         @NotNull
-        TodoStatus status
+        TodoStatus status,
+
+        String userId
 ) {
 
-    Todo(
-            String description,
-            TodoStatus status
-    ) {
-        this(null, description, status);
+    Todo(String description, TodoStatus status, String authorId) {
+        this(null, description, status, authorId);
+    }
+
+    Todo() {
+        this(null, null, null, null);
     }
 
 
     public Todo withId(String id) {
-        return new Todo(id, description, status);
+        return new Todo(id, description, status, userId);
+    }
+
+    public Todo withUserId(String authorId) {
+        return new Todo(id, description, status, authorId);
     }
 }

@@ -1,5 +1,8 @@
 package de.neuefische.backend.todo;
 
+import de.neuefische.backend.security.MongoUser;
+import de.neuefische.backend.security.MongoUserService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,19 +12,29 @@ import java.util.UUID;
 class TodoService {
 
     private final TodoRepository todoRepository;
+    private final MongoUserService mongoUserService;
 
-    TodoService(TodoRepository todoRepository) {
+    TodoService(TodoRepository todoRepository, MongoUserService mongoUserService) {
         this.todoRepository = todoRepository;
+        this.mongoUserService = mongoUserService;
     }
 
     List<Todo> getAll() {
-        return todoRepository.findAll();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        MongoUser user = mongoUserService.findUserByUsername(username);
+
+        return todoRepository.findAllByUserId(user.id());
     }
 
     public Todo save(Todo todo) {
         String id = UUID.randomUUID().toString();
 
-        Todo todoToSave = todo.withId(id);
+        Todo todoWithId = todo.withId(id);
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        MongoUser user = mongoUserService.findUserByUsername(username);
+
+        Todo todoToSave = new Todo(todoWithId.id(), todoWithId.description(), todoWithId.status(), user.id());
 
         return todoRepository.save(todoToSave);
     }
