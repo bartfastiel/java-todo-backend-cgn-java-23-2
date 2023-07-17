@@ -1,11 +1,13 @@
 package de.neuefische.backend.todo;
 
+import de.neuefische.backend.exception.NoSuchTodoException;
 import de.neuefische.backend.security.MongoUser;
 import de.neuefische.backend.security.MongoUserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -40,7 +42,7 @@ class TodoService {
     }
 
     public Todo getById(String id) {
-        return todoRepository.findById(id).orElseThrow();
+        return todoRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Todo with id: " + id + " not found!"));
     }
 
     public Todo update(Todo todo) {
