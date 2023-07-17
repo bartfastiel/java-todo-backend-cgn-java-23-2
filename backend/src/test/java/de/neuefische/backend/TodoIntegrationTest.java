@@ -2,7 +2,10 @@ package de.neuefische.backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.neuefische.backend.security.MongoUser;
+import de.neuefische.backend.security.MongoUserRepository;
 import de.neuefische.backend.todo.Todo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
- class TodoIntegrationTest {
+class TodoIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;
@@ -28,7 +31,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    MongoUserRepository mongoUserRepository;
+
+
+    @BeforeEach
+    public void setUp() {
+        mongoUserRepository.deleteAll();
+        mongoUserRepository.save(new MongoUser("123", "user", "password"));
+    }
+
     @Test
+    @WithMockUser
     void expectEmptyListOnGet() throws Exception {
         mockMvc.perform(get("http://localhost:8080/api/todo"))
                 .andExpect(status().isOk())
@@ -39,8 +53,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
     @DirtiesContext
     @Test
-    @WithMockUser(username = "frank")
+    @WithMockUser
     void expectSuccessfulPost() throws Exception {
+
         String actual = mockMvc.perform(
                         post("http://localhost:8080/api/todo")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -49,7 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                                         """)
                                 .with(csrf())
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json("""
                         {
                           "description": "Nächsten Endpunkt implementieren",
@@ -68,6 +83,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     @DirtiesContext
     @Test
     @WithMockUser
+    void expectInvalidPost() throws Exception {
+        mockMvc.perform(
+                        post("http://localhost:8080/api/todo")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {"description":"123","status":"OPEN"}
+                                        """)
+                                .with(csrf())
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json("""
+                        {
+                          "message": "Beschreibung muss zwischen 6 und 128 Zeichen lang sein!"
+                        }
+                        """));
+    }
+
+    @DirtiesContext
+    @Test
+    @WithMockUser
     void expectSuccessfulPut() throws Exception {
         String saveResult = mockMvc.perform(
                         post("http://localhost:8080/api/todo")
@@ -77,7 +112,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                                         """)
                                 .with(csrf())
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json("""
                         {
                           "description": "Nächsten Endpunkt implementieren",
@@ -152,7 +187,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                                         """)
                                 .with(csrf())
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json("""
                         {
                           "description": "Nächsten Endpunkt implementieren",
