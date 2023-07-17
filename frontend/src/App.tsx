@@ -9,16 +9,18 @@ import ProtectedRoutes from "./ProtectedRoutes";
 
 function App() {
 
-    const [user, setUser] =  useState<string>()
+    const [user, setUser] = useState<string>()
     const [todos, setTodos] = useState<Todo[]>()
 
     const navigate = useNavigate()
 
     function fetchTodos() {
-        axios.get("/api/todo")
-            .then(response => {
-                setTodos(response.data)
-            })
+        if (user !== undefined && user !== "anonymousUser") {
+            axios.get("/api/todo")
+                .then(response => {
+                    setTodos(response.data)
+                })
+        }
     }
 
     function login(username: string, password: string) {
@@ -36,38 +38,50 @@ function App() {
             })
     }
 
+    function logout() {
+        axios.post("/api/users/logout")
+            .then(() => {
+                me()
+            })
+    }
+
     useEffect(() => {
         fetchTodos()
         me()
-    }, [])
-
-    if (!todos) {
-        return "Lade..."
-    }
+    }, [user])
 
     return (
         <div>
             <div>
                 <h1>TODOs</h1>
                 <p>{user}</p>
+                {
+                    user === undefined || user !== "anonymousUser"
+                        ? <button onClick={() => logout()}>Logout</button>
+                        : <button onClick={() => navigate("/login")}>Login</button>
+                }
+
             </div>
+
             <Routes>
-                <Route element={<ProtectedRoutes user={user}/>} >
+                <Route element={<ProtectedRoutes user={user}/>}>
 
                     <Route path="/" element={<div className="page">
                         {
-                            allPossibleTodos.map(status => {
-                                const filteredTodos = todos.filter(todo => todo.status === status)
-                                return <TodoColumn
-                                    status={status}
-                                    todos={filteredTodos}
-                                    onTodoItemChange={fetchTodos}
-                                    key={status}
-                                />
-                            })
+                            !todos
+                                ? <p>Lade...</p>
+                                : allPossibleTodos.map(status => {
+                                    const filteredTodos = todos.filter(todo => todo.status === status)
+                                    return <TodoColumn
+                                        status={status}
+                                        todos={filteredTodos}
+                                        onTodoItemChange={fetchTodos}
+                                        key={status}
+                                    />
+                                })
                         }
                     </div>}/>
-                    <Route path="home" element={<p>Home</p>} />
+                    <Route path="home" element={<p>Home</p>}/>
                 </Route>
 
 
