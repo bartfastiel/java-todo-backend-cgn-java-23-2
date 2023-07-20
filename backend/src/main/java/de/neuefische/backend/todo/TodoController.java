@@ -2,6 +2,7 @@ package de.neuefische.backend.todo;
 
 import de.neuefische.backend.exception.ErrorMessage;
 import jakarta.validation.Valid;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ class TodoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    Todo postTodo(@Valid @RequestBody Todo todo) {
+    public Todo postTodo(@Valid @RequestBody Todo todo) {
         return todoService.save(todo);
     }
 

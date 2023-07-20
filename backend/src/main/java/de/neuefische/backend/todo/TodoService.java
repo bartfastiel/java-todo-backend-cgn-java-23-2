@@ -3,6 +3,9 @@ package de.neuefische.backend.todo;
 import de.neuefische.backend.exception.NoSuchTodoException;
 import de.neuefische.backend.security.MongoUser;
 import de.neuefische.backend.security.MongoUserService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +16,7 @@ import java.util.UUID;
 @Service
 class TodoService {
 
+    public static final String CACHE_TODOS = "CACHE_TODOS";
     private final TodoRepository todoRepository;
     private final MongoUserService mongoUserService;
 
@@ -21,7 +25,13 @@ class TodoService {
         this.mongoUserService = mongoUserService;
     }
 
-    List<Todo> getAll() {
+    @Cacheable(value = CACHE_TODOS)
+    public List<Todo> getAll() {
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         MongoUser user = mongoUserService.findUserByUsername(username);
 
@@ -51,6 +61,12 @@ class TodoService {
 
     public void delete(String id) {
         todoRepository.deleteById(id);
+    }
+
+    @CacheEvict(CACHE_TODOS)
+    @Scheduled(cron = "0 * * * * *")
+    public void clearCache() {
+        System.out.println("Cache cleared");
     }
 }
 
