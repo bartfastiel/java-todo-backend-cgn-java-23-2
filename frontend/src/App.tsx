@@ -16,7 +16,9 @@ function App() {
 
     function fetchTodos() {
         if (user !== undefined && user !== "anonymousUser") {
-            axios.get("/api/todo")
+            axios.get("/api/todo", {headers: {
+                Authorization: "Bearer " + user.token
+                }})
                 .then(response => {
                     setTodos(response.data)
                 })
