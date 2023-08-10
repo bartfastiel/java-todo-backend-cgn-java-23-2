@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +35,9 @@ class TodoIntegrationTest {
 
     @Autowired
     MongoUserRepository mongoUserRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
 
     @BeforeEach
@@ -130,7 +135,7 @@ class TodoIntegrationTest {
                         put("http://localhost:8080/api/todo/" + id + "/update")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
-                                        {"id":"<ID>","description":"Bla","status":"IN_PROGRESS"}
+                                        {"id":"<ID>","description":"Blablablabla","status":"IN_PROGRESS"}
                                         """.replaceFirst("<ID>", id))
                                 .with(csrf())
                 )
@@ -138,7 +143,7 @@ class TodoIntegrationTest {
                 .andExpect(content().json("""
                         {
                           "id": "<ID>",
-                          "description": "Bla",
+                          "description": "Blablablabla",
                           "status": "IN_PROGRESS"
                         }
                         """.replaceFirst("<ID>", id)));
@@ -211,15 +216,45 @@ class TodoIntegrationTest {
                         }
                         """.replaceFirst("<ID>", id)));
     }
+
+    @Test
+    @DirtiesContext
+    void testLogin() throws Exception {
+
+        mongoUserRepository.save(new MongoUser("123", "frank", passwordEncoder.encode("frank1")));
+        //GIVEN
+        mockMvc.perform(post("/api/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                "username": "frank",
+                                "password": "frank1"
+                                }
+                                """))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DirtiesContext
+    void testLoginHeader() throws Exception {
+
+        mongoUserRepository.save(new MongoUser("123", "frank", passwordEncoder.encode("frank1")));
+        //GIVEN
+        mockMvc.perform(get("/api/users/me1")
+                        .header(HttpHeaders.AUTHORIZATION, getToken()))
+                .andExpect(status().isOk());
+    }
+
+    private String getToken() throws Exception {
+        return mockMvc.perform(post("/api/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                        "username": "frank",
+                        "password": "frank1"
+                        }
+                        """))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
