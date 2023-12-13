@@ -1,7 +1,7 @@
-package de.neuefische.todo.backend;
+package de.neuefische.backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.neuefische.todo.backend.todo.Todo;
+import de.neuefische.backend.todo.Todo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TodoIntegrationTest {
+class TodoIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;
